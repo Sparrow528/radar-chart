@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>企业综合财税雷达图 — 宇守信咨询</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#f0f2f5; color:#2d3436; padding-bottom:60px; }
+.header { background:linear-gradient(135deg,#0c1445,#1a3a6b); color:white; padding:32px 20px 24px; text-align:center; }
+.header h1 { font-size:22px; font-weight:700; margin-bottom:6px; }
+.header p { font-size:13px; opacity:0.85; }
+.header .badge { display:inline-block; background:rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; margin-top:8px; }
+.tabs { display:flex; background:white; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:sticky; top:0; z-index:10; }
+.tab { flex:1; text-align:center; padding:14px 0; font-size:14px; font-weight:500; color:#888; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; }
+.tab.active { color:#1e3a6f; border-bottom-color:#1e3a6f; }
+.panel { display:none; padding:16px; }
+.panel.active { display:block; }
+.card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:12px; }
+.card-title { background:#f0f4ff; padding:10px 16px; font-size:13px; font-weight:600; color:#1e3a6f; border-bottom:1px solid #e0e7ff; }
+.form-row { padding:10px 16px; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.form-row label { font-size:13px; color:#444; min-width:150px; flex-shrink:0; }
+.form-row input,.form-row select { padding:8px 12px; border:1px solid #e0e0e0; border-radius:8px; font-size:13px; flex:1; min-width:80px; max-width:200px; background:#fff8e1; line-height:44px; height:44px; }
+.form-row input:focus,.form-row select:focus { outline:none; border-color:#3b82f6; }
+.form-row .unit { font-size:12px; color:#888; }
+.yesno { display:flex; gap:8px; }
+.yesno span { padding:4px 16px; border-radius:16px; font-size:13px; cursor:pointer; border:1px solid #ddd; color:#666; }
+.yesno span.sel-yes { background:linear-gradient(135deg,#0c1445,#1a3a6b); color:white; border-color:#3b82f6; }
+.yesno span.sel-no { background:#e8ecf1; color:#999; border-color:#ddd; }
+.fixed-bottom { position:sticky; bottom:0; background:white; padding:12px 16px; display:flex; gap:10px; box-shadow:0 -2px 8px rgba(0,0,0,0.06); z-index:10; }
+.fixed-bottom button { flex:1; padding:12px; border-radius:10px; font-size:14px; font-weight:600; border:none; cursor:pointer; }
+.btn-primary { background:linear-gradient(135deg,#0c1445,#1a3a6b); color:white; }
+.btn-primary:hover { opacity:0.9; }
+.btn-secondary { background:#e8ecf1; color:#555; }
+
+.score-card { background:linear-gradient(135deg,#0c1445,#1a3a6b); color:white; border-radius:16px; padding:28px 20px; text-align:center; margin-bottom:16px; }
+.score-card .label { font-size:13px; opacity:0.85; }
+.score-card .score { font-size:40px; font-weight:800; margin:6px 0; }
+.score-card .grade { font-size:16px; font-weight:600; margin-bottom:4px; }
+.score-card .suggestion { font-size:13px; opacity:0.9; line-height:1.6; }
+.result-summary { background:linear-gradient(135deg,#0c1445,#1a3a6b); color:white; border-radius:16px; padding:28px 20px; text-align:center; margin-bottom:16px; }
+.result-summary .row { display:flex; justify-content:space-around; margin-top:12px; flex-wrap:wrap; gap:8px; }
+.result-summary .item { flex:1; min-width:100px; }
+.result-summary .item .label { font-size:11px; opacity:0.85; }
+.result-summary .item .val { font-size:22px; font-weight:800; margin:4px 0; }
+.result-summary .item .sub { font-size:12px; opacity:0.85; }
+
+.dim-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.dim-card { background:white; border-radius:12px; padding:16px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.dim-card .name { font-size:12px; color:#888; margin-bottom:4px; }
+.dim-card .dscore { font-size:20px; font-weight:700; }
+.dim-card .dstatus { font-size:11px; margin-top:4px; padding:2px 10px; border-radius:10px; display:inline-block; }
+.low { background:#e6f7e6; color:#16a34a; }
+.mid { background:#fef9e7; color:#d97706; }
+.high { background:#feeaea; color:#dc2626; }
+.pass { background:#e6f7e6; color:#16a34a; }
+.warn { background:#fef9e7; color:#d97706; }
+.danger { background:#feeaea; color:#dc2626; }
+.fail { background:#feeaea; color:#dc2626; }
+.caution { background:#fef9e7; color:#d97706; }
+.rate-green { background:#e6f7e6; color:#16a34a; }
+.rate-yellow { background:#fef9e7; color:#d97706; }
+.rate-red { background:#feeaea; color:#dc2626; }
+
+.help-card { background:white; border-radius:12px; padding:20px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.help-card h3 { font-size:15px; margin-bottom:8px; color:#1e3a6f; }
+.help-card p,.help-card li { font-size:13px; color:#555; line-height:1.8; }
+.check-list { list-style:none; padding:0; }
+.check-list li { padding:6px 0; font-size:13px; color:#444; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:8px; }
+.check-list li:last-child { border-bottom:none; }
+.detail-item { padding:12px 16px; border-bottom:1px solid #f5f5f5; display:flex; justify-content:space-between; align-items:center; }
+.detail-item:last-child { border-bottom:none; }
+.detail-item .dlabel { font-size:13px; color:#555; }
+.detail-item .dval { font-size:14px; font-weight:600; }
+.detail-item .dval.pass { color:#16a34a; }
+.detail-item .dval.warn { color:#d97706; }
+.detail-item .dval.danger { color:#dc2626; }
+.result-card { background:white; border-radius:12px; padding:16px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.result-card h3 { font-size:14px; color:#1e3a6f; margin-bottom:8px; }
+.result-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f5f5f5; font-size:13px; }
+.result-row:last-child { border-bottom:none; }
+.result-row .label { color:#555; }
+.result-row .val { font-weight:600; }
+.result-row.total { border-top:2px solid #1e3a6f; padding-top:8px; margin-top:4px; font-weight:700; }
+.result-row.total .val { color:#1e3a6f; font-size:16px; }
+.result-green { color:#16a34a; }
+.result-red { color:#dc2626; }
+.result-orange { color:#d97706; }
+
+.member-banner { background:linear-gradient(135deg,#0f0c29,#302b63,#24243e); border-radius:12px; padding:20px; text-align:center; margin-top:16px; }
+.member-banner h3 { font-size:15px; color:white; margin-bottom:6px; }
+.member-banner p { font-size:12px; color:rgba(255,255,255,0.85); line-height:1.6; }
+.member-banner .btn { display:inline-block; background:white; color:#1e3a6f; padding:8px 24px; border-radius:20px; text-decoration:none; font-size:13px; font-weight:600; margin-top:8px; }
+
+.contact { background:#eef2ff; border-radius:8px; padding:12px; }
+.contact strong { font-size:14px; color:#1e3a6f; }
+.scenario-grid { display:flex; gap:8px; }
+.scenario-btn { flex:1; padding:10px; border-radius:8px; font-size:13px; font-weight:600; border:2px solid #ddd; background:white; color:#888; cursor:pointer; text-align:center; transition:all .2s; }
+.scenario-btn.active { border-color:#3b82f6; color:#1e3a6f; background:#eef2ff; }
+.chart-area { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); margin-bottom:16px; text-align:center; }
+.chart-area canvas { max-width:100%; height:auto; }
+.form-row input[type=range] { flex:1; min-width:120px; max-width:250px; accent-color:#3b82f6; }
+.form-row .val { font-size:14px; font-weight:700; color:#1e3a6f; min-width:30px; text-align:right; }
+.form-row .hint { font-size:11px; color:#999; }
+.dim-card .bar-bg { position:absolute; bottom:0; left:0; height:4px; background:#e8ecf1; width:100%; }
+.dim-card .bar-fill { position:absolute; bottom:0; left:0; height:4px; transition:width .5s; }
+
+@media (max-width:480px){.dim-grid{grid-template-columns:1fr 1fr}.result-summary .row{flex-direction:column;gap:4px}}
+
+
+/* ===== 打印/PDF样式 ===== */
+@media print {
+  body { background:white !important; padding:0 !important; margin:0 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .fixed-bottom, .no-print, .marketing, [class*="返回"], footer, .footer, #返回, .return-bar, .bottom-bar { display:none !important; }
+  .header { background:linear-gradient(135deg,#0c1445,#1a3a6b) !important; color:white !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; padding:20px 16px !important; }
+  .card, .dim-card, .check-item, .result-card { break-inside:avoid; page-break-inside:avoid; border:1px solid #ddd !important; box-shadow:none !important; }
+  .score-card, .result-summary { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .tabs { display:none !important; }
+  .panel { display:block !important; padding:10px !important; }
+  .dim-grid { display:grid !important; grid-template-columns:1fr 1fr !important; gap:8px !important; }
+  .form-row { padding:6px 10px !important; }
+  a[href]:after { content:none !important; }
+}
+
+.pdf-btn { background:linear-gradient(135deg,#b8860b,#d4a843) !important; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📊 企业综合财税雷达图</h1>
+  <p>多维度可视化 · 全景式财税健康诊断</p>
+  <div class="badge">您身边的财税专家 · 洪淳宇</div>
+</div>
+<div class="tabs">
+  <div class="tab active" data-tab="input" onclick="st('input')">📝 评分</div>
+  <div class="tab" data-tab="report" onclick="st('report')">📊 雷达报告</div>
+  <div class="tab" data-tab="help" onclick="st('help')">❓ 说明</div>
+</div>
+
+<div class="panel active" id="p-input">
+  <div class="card">
+    <div class="card-title">🏢 企业基础信息</div>
+    <div class="form-row"><label>企业名称</label><input id="f_企业名称" placeholder="选填" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;flex:1;max-width:250px"></div>
+    <div class="form-row"><label>所属行业</label>
+      <select id="f_行业" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+        <option>制造业</option><option>商贸零售</option><option>服务业</option><option>建筑业</option><option>房地产</option><option>科技</option><option>其他</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 各维度评分（滑动条，0~100分）</div>
+    <div class="form-row">
+      <label>💰 现金流健康度</label>
+      <input type="range" id="s_现金流" min="0" max="100" value="70" oninput="updateVal(this,'v_现金流')">
+      <span class="val" id="v_现金流">70</span><span class="hint">流动性/偿债能力</span>
+    </div>
+    <div class="form-row">
+      <label>📋 税负合理性</label>
+      <input type="range" id="s_税负" min="0" max="100" value="65" oninput="updateVal(this,'v_税负')">
+      <span class="val" id="v_税负">65</span><span class="hint">税负率与行业标准对比</span>
+    </div>
+    <div class="form-row">
+      <label>🔍 税务合规性</label>
+      <input type="range" id="s_税务合规" min="0" max="100" value="60" oninput="updateVal(this,'v_税务合规')">
+      <span class="val" id="v_税务合规">60</span><span class="hint">申报/稽查/发票合规</span>
+    </div>
+    <div class="form-row">
+      <label>🔬 研发/高新能力</label>
+      <input type="range" id="s_研发" min="0" max="100" value="40" oninput="updateVal(this,'v_研发')">
+      <span class="val" id="v_研发">40</span><span class="hint">研发费用/高新认定条件</span>
+    </div>
+    <div class="form-row">
+      <label>👥 社保个税合规</label>
+      <input type="range" id="s_社保" min="0" max="100" value="55" oninput="updateVal(this,'v_社保')">
+      <span class="val" id="v_社保">55</span><span class="hint">人员/基数/申报合规</span>
+    </div>
+    <div class="form-row">
+      <label>📈 汇算清缴准备</label>
+      <input type="range" id="s_汇算" min="0" max="100" value="50" oninput="updateVal(this,'v_汇算')">
+      <span class="val" id="v_汇算">50</span><span class="hint">扣除/优惠/调整合规</span>
+    </div>
+    <div class="form-row">
+      <label>📑 发票管理</label>
+      <input type="range" id="s_发票" min="0" max="100" value="45" oninput="updateVal(this,'v_发票')">
+      <span class="val" id="v_发票">45</span><span class="hint">进项/销项/保管规范</span>
+    </div>
+    <div class="form-row">
+      <label>📊 整体财务健康</label>
+      <input type="range" id="s_整体" min="0" max="100" value="50" oninput="updateVal(this,'v_整体')">
+      <span class="val" id="v_整体">50</span><span class="hint">综合财务体检结果</span>
+    </div>
+  </div>
+
+  <div class="fixed-bottom">
+    <button class="btn-secondary" onclick="resetAll()">重置</button>
+    <button class="btn-primary" onclick="calc()">📊 生成雷达图</button>
+  </div>
+</div>
+
+<div class="panel" id="p-report">
+  <div id="scoreCard" class="score-card">
+    <div class="label">综合财税健康评分</div>
+    <div class="score">—</div>
+    <div class="grade">请先在「评分」页调整各维度分值</div>
+    <div class="suggestion"></div>
+  </div>
+  <div id="chartContainer" class="chart-area">
+    <h3 style="font-size:16px;color:#4f46e5;margin-bottom:12px;">📊 财税健康雷达图</h3>
+    <canvas id="radarChart" width="400" height="400"></canvas>
+  </div>
+  <div id="dimGrid" class="dim-grid"></div>
+  <div class="fixed-bottom">
+    <button class="btn-secondary" onclick="st('input')">← 修改评分</button>
+    <button class="btn-primary" onclick="shareResult()">📤 分享</button>
+  </div>
+</div>
+
+<div class="panel" id="p-help">
+  <div class="help-card"><h3>📋 使用说明</h3>
+    <ol><li>在「评分」页通过滑动条给各维度打分（0~100）</li><li>参考其他工具的结果来评分：体检表、税负自查、现金流测试等</li><li>点击「生成雷达图」，直观展示企业财税健康全貌</li></ol>
+  </div>
+  <div class="help-card"><h3>📊 八大维度</h3>
+    <ul>
+      <li><strong>现金流健康度</strong> — 流动性、现金循环、偿债能力</li>
+      <li><strong>税负合理性</strong> — 增值税/所得税/综合税负率</li>
+      <li><strong>税务合规性</strong> — 申报规范、稽查风险、纳税调整</li>
+      <li><strong>研发/高新能力</strong> — 研发费用加计扣除、高新认定条件</li>
+      <li><strong>社保个税合规</strong> — 人员差异、基数匹配、申报合规</li>
+      <li><strong>汇算清缴准备</strong> — 税前扣除、优惠适用、纳税调整</li>
+      <li><strong>发票管理</strong> — 进项、销项、保管规范</li>
+      <li><strong>整体财务健康</strong> — 综合财务体检评分</li>
+    </ul>
+  </div>
+  <div class="help-card"><h3>👤 关于作者</h3>
+    <div class="contact">
+      <strong>洪淳宇 · 您身边的财税专家</strong>
+      <p>专注企业财税健康诊断、全流程合规管理、战略税务筹划</p>
+      <p style="margin-top:6px;">📞 186-0129-4989 | 💬 hongchunyu042896</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function updateVal(slider,displayId){
+  document.getElementById(displayId).textContent=slider.value;
+}
+function gs(id){return parseInt(document.getElementById("s_"+id).value)||0}
+function calc(){
+  const dims={
+    "现金流健康度":gs("现金流"),"税负合理性":gs("税负"),"税务合规性":gs("税务合规"),
+    "研发高新能力":gs("研发"),"社保个税合规":gs("社保"),"汇算清缴准备":gs("汇算"),
+    "发票管理":gs("发票"),"整体财务健康":gs("整体")
+  };
+  const vals=Object.values(dims);
+  const avg=Math.round(vals.reduce((s,v)=>s+v,0)/vals.length);
+
+  let grade,suggestion;
+  if(avg>=85){grade="🟢 财税状况优秀";suggestion="🎉 企业财税健康度优秀，继续保持！"}
+  else if(avg>=70){grade="🟡 状况良好";suggestion="📌 大部分维度表现良好，部分需优化"}
+  else if(avg>=55){grade="🟠 存在风险";suggestion="⚠️ 多个维度需关注，建议进行全面财税诊断"}
+  else{grade="🔴 风险较高";suggestion="🚨 财税健康度较低，建议立即请专业顾问介入"}
+
+  document.getElementById("scoreCard").innerHTML=
+    `<div class="label">综合财税健康评分</div><div class="score">${avg}/100</div><div class="grade">${grade}</div><div class="suggestion">${suggestion}</div>`;
+
+  // 画雷达图
+  const canvas=document.getElementById("radarChart");
+  const ctx=canvas.getContext("2d");
+  const W=canvas.width=400,H=canvas.height=400;
+  const cx=200,cy=200,R=150;
+  const labels=Object.keys(dims);
+  const n=labels.length;
+  const angleStep=2*Math.PI/n;
+
+  ctx.clearRect(0,0,W,H);
+
+  // 背景网格
+  for(let r=1;r<=5;r++){
+    const radius=R*r/5;
+    ctx.beginPath();
+    for(let i=0;i<=n;i++){
+      const angle=-Math.PI/2+i*angleStep;
+      const x=cx+radius*Math.cos(angle);
+      const y=cy+radius*Math.sin(angle);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=r===5?"#d0d0d0":"#e8e8e8";
+    ctx.lineWidth=r===5?1:0.5;
+    ctx.stroke();
+  }
+
+  // 轴线
+  for(let i=0;i<n;i++){
+    const angle=-Math.PI/2+i*angleStep;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+R*Math.cos(angle),cy+R*Math.sin(angle));
+    ctx.strokeStyle="#d0d0d0";
+    ctx.lineWidth=0.5;
+    ctx.stroke();
+  }
+
+  // 数据区域
+  const data=Object.values(dims);
+  ctx.beginPath();
+  for(let i=0;i<=n;i++){
+    const idx=i%n;
+    const angle=-Math.PI/2+idx*angleStep;
+    const radius=R*data[idx]/100;
+    const x=cx+radius*Math.cos(angle);
+    const y=cy+radius*Math.sin(angle);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle="rgba(79,70,229,0.15)";
+  ctx.fill();
+  ctx.strokeStyle="#4f46e5";
+  ctx.lineWidth=2;
+  ctx.stroke();
+
+  // 数据点
+  for(let i=0;i<n;i++){
+    const angle=-Math.PI/2+i*angleStep;
+    const radius=R*data[i]/100;
+    const x=cx+radius*Math.cos(angle);
+    const y=cy+radius*Math.sin(angle);
+    ctx.beginPath();
+    ctx.arc(x,y,4,0,2*Math.PI);
+    ctx.fillStyle="#4f46e5";
+    ctx.fill();
+  }
+
+  // 标签
+  ctx.font="12px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+  ctx.fillStyle="#333";
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  for(let i=0;i<n;i++){
+    const angle=-Math.PI/2+i*angleStep;
+    const labelR=R+25;
+    const x=cx+labelR*Math.cos(angle);
+    const y=cy+labelR*Math.sin(angle);
+    // 简写标签
+    const shortLabels={
+      "现金流健康度":"现金流","税负合理性":"税负","税务合规性":"税务合规",
+      "研发高新能力":"研发高新","社保个税合规":"社保个税","汇算清缴准备":"汇算清缴",
+      "发票管理":"发票","整体财务健康":"整体"
+    };
+    ctx.fillText(shortLabels[labels[i]]||labels[i],x,y);
+    // 分数
+    const scoreR=R+40;
+    const sx=cx+scoreR*Math.cos(angle);
+    const sy=cy+scoreR*Math.sin(angle);
+    ctx.font="11px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+    ctx.fillStyle="#4f46e5";
+    ctx.fillText(data[i]+"分",sx,sy);
+    ctx.font="12px -apple-system,'PingFang SC','Microsoft YaHei',sans-serif";
+  }
+
+  // 维度卡片
+  const dimGrid=document.getElementById("dimGrid");
+  dimGrid.innerHTML=labels.map((label,i)=>{
+    const v=data[i];
+    let cls="rate-green",col="#16a34a";
+    if(v<55){cls="rate-red";col="#dc2626"}
+    else if(v<70){cls="rate-yellow";col="#d97706"}
+    const barPct=v+"%";
+    return `<div class="dim-card">
+      <div class="bar-bg"></div>
+      <div class="bar-fill" style="width:${barPct};background:${col}"></div>
+      <div class="name">${label}</div>
+      <div class="dscore" style="color:${col}">${v}</div>
+      <div class="dstatus ${cls}">${v>=70?"良好":v>=55?"关注":"风险"}</div>
+    </div>`;
+  }).join("");
+  st("report");
+}
+function st(n){document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===n));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id==="p-"+n));window.scrollTo(0,0)}
+function resetAll(){
+  if(!confirm("重置所有滑条？"))return;
+  document.querySelectorAll("input[type=range]").forEach(el=>{el.value=50;updateVal(el,"v_"+el.id.slice(2))});
+  document.querySelectorAll("input[type=text]").forEach(el=>el.value="");
+}
+function shareResult(){alert("📱 请截屏保存本页面，即可分享给客户！")}
+
+function downloadPDF(){
+  window.print();
+}
+</script>
+</body>
+</html>
